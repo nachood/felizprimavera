@@ -1,0 +1,657 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Un ramo para vos</title>
+    <style>
+      :root {
+        --ink: #251f22;
+        --muted: #695d62;
+        --paper: #fffaf6;
+        --rose: #ef6f8f;
+        --rose-deep: #c7436a;
+        --sun: #ffc85a;
+        --leaf: #357a58;
+        --leaf-soft: #7fb88b;
+        --lilac: #a580c9;
+        --sky: #d7eef3;
+        --shadow: 0 18px 50px rgba(83, 48, 54, 0.18);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        min-height: 100%;
+        background: var(--paper);
+      }
+
+      body {
+        min-height: 100vh;
+        margin: 0;
+        color: var(--ink);
+        font-family:
+          Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+        letter-spacing: 0;
+        background:
+          radial-gradient(circle at 15% 10%, rgba(255, 200, 90, 0.28), transparent 30%),
+          radial-gradient(circle at 90% 5%, rgba(215, 238, 243, 0.95), transparent 34%),
+          linear-gradient(180deg, #fff8ef 0%, #fffdf8 46%, #f5fbf7 100%);
+        overflow-x: hidden;
+      }
+
+      button {
+        font: inherit;
+      }
+
+      .petal-field {
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        pointer-events: none;
+        overflow: hidden;
+      }
+
+      .floating-petal {
+        position: absolute;
+        width: 17px;
+        height: 24px;
+        border-radius: 80% 20% 70% 20%;
+        background: rgba(239, 111, 143, 0.35);
+        transform: rotate(var(--tilt));
+        animation: drift var(--speed) linear infinite;
+        left: var(--x);
+        top: -40px;
+        animation-delay: var(--delay);
+      }
+
+      .floating-petal:nth-child(2n) {
+        background: rgba(255, 200, 90, 0.36);
+      }
+
+      .floating-petal:nth-child(3n) {
+        background: rgba(127, 184, 139, 0.33);
+      }
+
+      @keyframes drift {
+        0% {
+          transform: translate3d(0, -60px, 0) rotate(var(--tilt));
+          opacity: 0;
+        }
+        12% {
+          opacity: 1;
+        }
+        100% {
+          transform: translate3d(var(--sway), calc(100vh + 90px), 0) rotate(calc(var(--tilt) + 210deg));
+          opacity: 0;
+        }
+      }
+
+      .screen {
+        position: relative;
+        z-index: 1;
+        display: grid;
+        min-height: 100vh;
+        padding: 22px 18px 28px;
+        place-items: center;
+      }
+
+      .experience {
+        width: min(100%, 430px);
+        min-height: min(780px, calc(100vh - 44px));
+        display: grid;
+        grid-template-rows: auto 1fr auto;
+        gap: 18px;
+      }
+
+      .topline {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
+
+      .season {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        min-height: 34px;
+        padding: 0 12px;
+        border: 1px solid rgba(53, 122, 88, 0.2);
+        border-radius: 999px;
+        color: #2c674b;
+        background: rgba(255, 255, 255, 0.62);
+        font-size: 0.82rem;
+        font-weight: 750;
+        backdrop-filter: blur(14px);
+      }
+
+      .season-mark {
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        background: var(--leaf-soft);
+        box-shadow: 0 0 0 5px rgba(127, 184, 139, 0.18);
+      }
+
+      .progress {
+        min-width: 70px;
+        color: var(--muted);
+        font-size: 0.82rem;
+        font-weight: 700;
+        text-align: right;
+      }
+
+      .hero {
+        align-self: stretch;
+        display: grid;
+        align-content: center;
+        justify-items: center;
+        gap: 16px;
+        text-align: center;
+      }
+
+      h1 {
+        width: 100%;
+        margin: 0;
+        font-size: clamp(2.35rem, 12vw, 4.35rem);
+        line-height: 0.94;
+        font-weight: 900;
+        text-wrap: balance;
+      }
+
+      .subtitle {
+        max-width: 29ch;
+        margin: 0;
+        color: var(--muted);
+        font-size: 1rem;
+        line-height: 1.55;
+      }
+
+      .garden {
+        position: relative;
+        width: min(100%, 390px);
+        aspect-ratio: 1 / 1.03;
+        margin: 2px auto 0;
+      }
+
+      .sun {
+        position: absolute;
+        top: 2%;
+        right: 3%;
+        width: 70px;
+        aspect-ratio: 1;
+        border-radius: 50%;
+        background: radial-gradient(circle, #ffeaa6 0 42%, #ffc85a 43% 100%);
+        box-shadow: 0 0 35px rgba(255, 200, 90, 0.4);
+      }
+
+      .bouquet {
+        position: absolute;
+        inset: 5% 2% 6%;
+      }
+
+      .wrap {
+        position: absolute;
+        left: 50%;
+        bottom: 0;
+        width: 48%;
+        height: 43%;
+        transform: translateX(-50%);
+        border-radius: 18px 18px 34px 34px;
+        background:
+          linear-gradient(138deg, transparent 0 42%, rgba(255, 255, 255, 0.35) 42% 56%, transparent 56%),
+          linear-gradient(160deg, #f2c7a7 0%, #edb990 100%);
+        clip-path: polygon(16% 0, 84% 0, 66% 100%, 34% 100%);
+        box-shadow: var(--shadow);
+      }
+
+      .ribbon {
+        position: absolute;
+        left: 50%;
+        bottom: 25%;
+        width: 38%;
+        height: 22px;
+        transform: translateX(-50%) rotate(-2deg);
+        border-radius: 999px;
+        background: #e0526d;
+        box-shadow: 0 8px 18px rgba(169, 48, 73, 0.25);
+      }
+
+      .stem {
+        position: absolute;
+        left: 50%;
+        bottom: 21%;
+        width: 7px;
+        height: var(--stem);
+        transform-origin: bottom center;
+        transform: translateX(-50%) rotate(var(--angle));
+        border-radius: 999px;
+        background: linear-gradient(#5a9e70, #2f754e);
+      }
+
+      .stem::before,
+      .stem::after {
+        content: "";
+        position: absolute;
+        width: 22px;
+        height: 13px;
+        top: 48%;
+        border-radius: 100% 0 100% 0;
+        background: var(--leaf-soft);
+        opacity: 0.9;
+      }
+
+      .stem::before {
+        left: -21px;
+        transform: rotate(-24deg);
+      }
+
+      .stem::after {
+        right: -21px;
+        transform: rotate(34deg) scaleX(-1);
+      }
+
+      .flower {
+        position: absolute;
+        left: 50%;
+        bottom: calc(21% + var(--stem));
+        width: var(--size);
+        height: var(--size);
+        transform: translate(-50%, 50%) rotate(var(--spin));
+        opacity: 0;
+        scale: 0.45;
+        transition:
+          opacity 0.5s ease,
+          scale 0.55s cubic-bezier(0.2, 1.4, 0.25, 1);
+      }
+
+      .stem.visible .flower {
+        opacity: 1;
+        scale: 1;
+      }
+
+      .petal {
+        position: absolute;
+        inset: 12% 34% 43%;
+        border-radius: 65% 65% 45% 45%;
+        background: var(--bloom);
+        transform-origin: 50% 105%;
+        box-shadow: inset 0 -7px 10px rgba(0, 0, 0, 0.06);
+      }
+
+      .petal:nth-child(1) {
+        transform: rotate(0deg) translateY(-10%);
+      }
+
+      .petal:nth-child(2) {
+        transform: rotate(60deg) translateY(-10%);
+      }
+
+      .petal:nth-child(3) {
+        transform: rotate(120deg) translateY(-10%);
+      }
+
+      .petal:nth-child(4) {
+        transform: rotate(180deg) translateY(-10%);
+      }
+
+      .petal:nth-child(5) {
+        transform: rotate(240deg) translateY(-10%);
+      }
+
+      .petal:nth-child(6) {
+        transform: rotate(300deg) translateY(-10%);
+      }
+
+      .center {
+        position: absolute;
+        inset: 35%;
+        border-radius: 50%;
+        background: #ffd76f;
+        box-shadow: inset 0 -4px 0 rgba(168, 111, 26, 0.13);
+      }
+
+      .message {
+        min-height: 88px;
+        display: grid;
+        align-content: center;
+        gap: 5px;
+        padding: 16px 18px;
+        border: 1px solid rgba(127, 184, 139, 0.36);
+        border-radius: 8px;
+        background: rgba(213, 245, 224, 0.82);
+        box-shadow: 0 14px 45px rgba(53, 122, 88, 0.13);
+        backdrop-filter: blur(18px);
+      }
+
+      .message[hidden] {
+        display: none;
+      }
+
+      .message strong {
+        font-size: 0.83rem;
+        color: var(--rose-deep);
+        text-transform: uppercase;
+      }
+
+      .message p {
+        margin: 0;
+        color: var(--ink);
+        font-size: 1.04rem;
+        line-height: 1.42;
+      }
+
+      .actions {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 10px;
+        align-items: stretch;
+      }
+
+      .actions.complete {
+        grid-template-columns: 1fr 52px;
+      }
+
+      .primary,
+      .icon-btn {
+        min-height: 54px;
+        border: 0;
+        border-radius: 999px;
+        box-shadow: 0 16px 28px rgba(199, 67, 106, 0.24);
+        cursor: pointer;
+        touch-action: manipulation;
+      }
+
+      .primary {
+        color: white;
+        background: linear-gradient(135deg, var(--rose), var(--rose-deep));
+        font-weight: 850;
+      }
+
+      .icon-btn {
+        display: grid;
+        place-items: center;
+        color: var(--rose-deep);
+        background: rgba(255, 255, 255, 0.82);
+        border: 1px solid rgba(199, 67, 106, 0.18);
+      }
+
+      .icon-btn[hidden] {
+        display: none;
+      }
+
+      .icon-btn svg {
+        width: 21px;
+        height: 21px;
+      }
+
+      .final-note {
+        position: fixed;
+        left: 50%;
+        top: 50%;
+        z-index: 3;
+        width: min(calc(100% - 32px), 390px);
+        padding: 18px;
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.94);
+        box-shadow: var(--shadow);
+        opacity: 0;
+        pointer-events: none;
+        transform: translate(-50%, -42%) scale(0.94);
+        transition:
+          opacity 0.28s ease,
+          transform 0.34s ease;
+      }
+
+      .final-note.open {
+        opacity: 1;
+        pointer-events: auto;
+        transform: translate(-50%, -50%) scale(1);
+      }
+
+      .note-backdrop {
+        position: fixed;
+        inset: 0;
+        z-index: 2;
+        background: rgba(37, 31, 34, 0.32);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.28s ease;
+      }
+
+      .note-backdrop.open {
+        opacity: 1;
+        pointer-events: auto;
+      }
+
+      .final-note h2 {
+        margin: 0 0 8px;
+        font-size: 1.18rem;
+      }
+
+      .final-note p {
+        margin: 0;
+        color: var(--muted);
+        line-height: 1.5;
+      }
+
+      .close-note {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        width: 34px;
+        height: 34px;
+        border: 0;
+        border-radius: 50%;
+        color: var(--muted);
+        background: #f8edea;
+        cursor: pointer;
+      }
+
+      @media (min-width: 700px) {
+        .screen {
+          padding: 32px;
+        }
+
+        .experience {
+          min-height: 790px;
+        }
+      }
+
+      @media (max-height: 710px) {
+        .experience {
+          gap: 12px;
+        }
+
+        h1 {
+          font-size: clamp(2rem, 10vw, 3.4rem);
+        }
+
+        .garden {
+          width: min(86vw, 315px);
+        }
+
+        .message {
+          min-height: 76px;
+          padding: 13px 15px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="petal-field" aria-hidden="true">
+      <i class="floating-petal" style="--x: 9%; --sway: 58px; --speed: 11s; --delay: -2s; --tilt: 18deg"></i>
+      <i class="floating-petal" style="--x: 24%; --sway: -42px; --speed: 13s; --delay: -6s; --tilt: 74deg"></i>
+      <i class="floating-petal" style="--x: 43%; --sway: 64px; --speed: 10s; --delay: -4s; --tilt: 142deg"></i>
+      <i class="floating-petal" style="--x: 69%; --sway: -76px; --speed: 14s; --delay: -8s; --tilt: 33deg"></i>
+      <i class="floating-petal" style="--x: 86%; --sway: 36px; --speed: 12s; --delay: -5s; --tilt: 105deg"></i>
+    </div>
+
+    <main class="screen">
+      <section class="experience" aria-label="Ramo de primavera">
+        <div class="topline">
+          <span class="season"><span class="season-mark"></span>Primavera para vos</span>
+          <span class="progress" id="progress">0 / 9</span>
+        </div>
+
+        <div class="hero">
+          <h1 id="headline">Un ramo para mi amor</h1>
+          <p class="subtitle">Porque un día pesado no merece quedarse con la última palabra.</p>
+
+          <div class="garden" aria-hidden="true">
+            <div class="sun"></div>
+            <div class="bouquet" id="bouquet">
+              <div class="wrap"></div>
+              <div class="ribbon"></div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="message" id="message" aria-live="polite" hidden>
+            <strong id="messageKicker"></strong>
+            <p id="messageText"></p>
+          </div>
+
+          <div class="actions" id="actions">
+            <button class="primary" id="addFlower">Sumar una flor</button>
+            <button class="icon-btn" id="openNote" aria-label="Abrir carta" hidden>
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M4.5 6.75h15v10.5h-15z" stroke="currentColor" stroke-width="1.8" />
+                <path d="m5 7.25 7 5.7 7-5.7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <div class="note-backdrop" id="noteBackdrop"></div>
+    <aside class="final-note" id="finalNote" aria-live="polite">
+      <button class="close-note" id="closeNote" aria-label="Cerrar carta">×</button>
+      <h2>Para cuando necesites aflojar los hombros</h2>
+      <p>
+        Ya terminaste y pasaste lo dificil amor, ahora descansa aca conmigo por que siempre voy
+        a estar orgulloso para vos y con ganas de verte sonreir que me encanta ver la hermosa
+        cara de mi mujer&lt;3
+      </p>
+    </aside>
+
+    <script>
+      const flowers = [
+        { angle: -34, stem: 168, size: 58, color: "#ef6f8f", spin: -10 },
+        { angle: 25, stem: 160, size: 52, color: "#ffc85a", spin: 18 },
+        { angle: -12, stem: 202, size: 66, color: "#a580c9", spin: 4 },
+        { angle: 39, stem: 205, size: 58, color: "#f28aa7", spin: -18 },
+        { angle: 0, stem: 224, size: 72, color: "#e0526d", spin: 8 },
+        { angle: -47, stem: 124, size: 48, color: "#ffb35c", spin: 24 },
+        { angle: 51, stem: 132, size: 50, color: "#7fb88b", spin: -28 },
+        { angle: -23, stem: 244, size: 56, color: "#d66fb1", spin: 16 },
+        { angle: 18, stem: 250, size: 62, color: "#f4a24f", spin: -6 }
+      ];
+
+      const messages = [
+        "Hoy hiciste muchisimo, incluso cuando te hablaron feo. Que fuerte y linda que sos<3",
+        "Arrancaste pesada la mañana pero aca me tenes para mimarte siempre mor",
+        "La forma en la que hiciste todo aun estando mal mereces siempre todo esto que te dedico mi vida",
+        "Que orgulloso estoy de vos<3",
+        "Te mando esta flor por cada cosa que resolviste sin que nadie viera el esfuerzo",
+        "Ahora que se calle un ratito el \"trabajo\", relajate con esta otra flor que te doy jijiji",
+        "Ojalá pudiera sacarte el enojo con la mano. Mientras tanto, te hice flores  ⌃ ⌃",
+        "Respirta un poquito y apoyate en mi hombro que aca estoy para vos bb",
+        "Listop: ramo completo para la persona que quiero cuidar hoy y siempre<3"
+      ];
+
+      const params = new URLSearchParams(window.location.search);
+      const nombre = params.get("nombre");
+      if (nombre) {
+        document.getElementById("headline").textContent = `Un ramo para ${nombre}`;
+      }
+
+      const bouquet = document.getElementById("bouquet");
+      const actions = document.getElementById("actions");
+      const message = document.getElementById("message");
+      const progress = document.getElementById("progress");
+      const messageKicker = document.getElementById("messageKicker");
+      const messageText = document.getElementById("messageText");
+      const addFlower = document.getElementById("addFlower");
+      const openNote = document.getElementById("openNote");
+      const finalNote = document.getElementById("finalNote");
+      const noteBackdrop = document.getElementById("noteBackdrop");
+      const closeNote = document.getElementById("closeNote");
+      let count = 0;
+
+      function createFlower(data, index) {
+        const stem = document.createElement("div");
+        stem.className = "stem";
+        stem.style.setProperty("--angle", `${data.angle}deg`);
+        stem.style.setProperty("--stem", `${data.stem}px`);
+        stem.style.zIndex = String(20 + index);
+
+        const flower = document.createElement("div");
+        flower.className = "flower";
+        flower.style.setProperty("--size", `${data.size}px`);
+        flower.style.setProperty("--bloom", data.color);
+        flower.style.setProperty("--spin", `${data.spin}deg`);
+
+        for (let i = 0; i < 6; i += 1) {
+          const petal = document.createElement("span");
+          petal.className = "petal";
+          flower.appendChild(petal);
+        }
+
+        const center = document.createElement("span");
+        center.className = "center";
+        flower.appendChild(center);
+        stem.appendChild(flower);
+        bouquet.appendChild(stem);
+        window.requestAnimationFrame(() => stem.classList.add("visible"));
+      }
+
+      function updateCopy() {
+        const safeCount = Math.min(count, flowers.length);
+        const isComplete = safeCount === flowers.length;
+        progress.textContent = `${safeCount} / ${flowers.length}`;
+        message.hidden = safeCount === 0;
+        messageKicker.textContent = safeCount > 0 ? (isComplete ? "Ramo completado:" : `Flor ${safeCount}:`) : "";
+        messageText.textContent = safeCount > 0 ? messages[safeCount - 1] : "";
+        addFlower.textContent = isComplete ? "Volver a empezar" : "Sumar una flor";
+        openNote.hidden = !isComplete;
+        actions.classList.toggle("complete", isComplete);
+      }
+
+      function setNoteOpen(isOpen) {
+        finalNote.classList.toggle("open", isOpen);
+        noteBackdrop.classList.toggle("open", isOpen);
+      }
+
+      function addNextFlower() {
+        if (count === flowers.length) {
+          count = 0;
+          bouquet.querySelectorAll(".stem").forEach((stem) => stem.remove());
+          setNoteOpen(false);
+          updateCopy();
+          return;
+        }
+
+        createFlower(flowers[count], count);
+        count += 1;
+        updateCopy();
+
+        if (count === flowers.length) {
+          setNoteOpen(true);
+        }
+      }
+
+      addFlower.addEventListener("click", addNextFlower);
+      openNote.addEventListener("click", () => setNoteOpen(true));
+      closeNote.addEventListener("click", () => setNoteOpen(false));
+      noteBackdrop.addEventListener("click", () => setNoteOpen(false));
+      updateCopy();
+    </script>
+  </body>
+</html>
